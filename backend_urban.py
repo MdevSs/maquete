@@ -2,15 +2,26 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from collections import defaultdict, deque
-from typing import Dict, Deque, Tuple
+from typing import Literal
 import time
 import threading
 
 app = FastAPI(title="UrbanFlow Backend")
 
+
+
 class Count(BaseModel):
     car_count1: int;
     car_count2: int
+
+class Command(BaseModel):
+    last_command: Literal["1R", "1G"];
+
+@app.post("/invert/")
+def inert_command(cmd: Command):
+    res = "1G" if cmd == "1R" else "1R";
+    print(f"INVERT: {res}")
+    return res
 
 @app.post("/decide/")
 async def create_item(count: Count):
@@ -30,3 +41,4 @@ async def create_item(count: Count):
 
 # Run with:
 # uvicorn backend_urban:app --host 127.0.0.1 --port 8000
+# uvicorn backend_urban:app --host 0.0.0.0 --port 8000
