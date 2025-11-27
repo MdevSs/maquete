@@ -13,7 +13,8 @@ MODEL_PATH = r"c:\github\IA-ESP32-CAM\models\best.pt"
 
 # Quantos segundos esperar antes de fazer nova requisição ao backend
 BACKEND_COOLDOWN = 5  
-
+car_regressive=False
+last_time_regressive=0
 
 def run_capture_inference():
 
@@ -21,23 +22,23 @@ def run_capture_inference():
     model = YOLO(MODEL_PATH)
 
     # Conecta Arduino
-    try:
-        arduino = serial.Serial('COM5', 9600, timeout=1)
-        print("Arduino conectado")
-        time.sleep(2)
-    except:
-        print("Erro ao conectar no Arduino")
-        arduino = None
+    # try:
+    #     arduino = serial.Serial('COM5', 9600, timeout=1)
+    #     print("Arduino conectado")
+    #     time.sleep(2)
+    # except:
+    #     print("Erro ao conectar no Arduino")
+    #     arduino = None
 
     last_sent_command = None
     last_backend_call = 0
 
+    session = requests.Session()
     while True:
         try:
             car_counts = []
             annotated_frames = []
 
-            session = requests.Session()
 
             for i, url in enumerate(ESP_URL):
 
@@ -74,29 +75,30 @@ def run_capture_inference():
 
             # --------- LÓGICA DE REQUISIÇÃO ----------
             now = time.time()
-    
-            # if car_count > 0
+
 
             # só chama o backend a cada X segundos
-            # if now - last_backend_call >= BACKEND_COOLDOWN:
+            if now - last_backend_call >= BACKEND_COOLDOWN:
+                if(car_regressive == False and now - last_time_regressive >= sec_limit):
+                    if(sec_limit == 0):
+                        sec_limit = 10
+                    payload = {"car_count": car_count}
+                    try:
+                        req = requests.post(BACKEND_URL, json=payload, timeout=5)
+                        command = req.text.strip().replace('"', '')  # ex: 1G15
 
-            #     payload = {"car_count": car_count}
-            #     try:
-            #         req = requests.post(BACKEND_URL, json=payload, timeout=5)
-            #         command = req.text.strip().replace('"', '')  # ex: 1G15
+                        print(f"[BACKEND] recebido: {command}")
 
-            #         print(f"[BACKEND] recebido: {command}")
+                        # só envia ao Arduino se mudou
+                        # if arduino and command != last_sent_command:
+                        #     arduino.write((command + "\n").encode())
+                        #     print(f"[ARDUINO] enviado: {command}")
+                        #     last_sent_command = command
 
-            #         # só envia ao Arduino se mudou
-            #         if arduino and command != last_sent_command:
-            #             arduino.write((command + "\n").encode())
-            #             print(f"[ARDUINO] enviado: {command}")
-            #             last_sent_command = command
+                        last_backend_call = now
 
-            #         last_backend_call = now
-
-            #     except Exception as e:
-            #         print("Erro backend:", e)
+                    except Exception as e:
+                        print("Erro backend:", e)
 
             # MOSTRA JANELA PARA DEBUG
             # MOSTRA JANELAS PARA DEBUG
@@ -117,3 +119,6 @@ def run_capture_inference():
 
 if __name__ == "__main__":
     run_capture_inference()
+
+# uvicorn backend_urban:app --host 0.0.0.0 --port 8000
+# uvicorn backend_urban:app --host 127.0.0.1 --port 8000

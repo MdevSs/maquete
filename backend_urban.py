@@ -14,14 +14,19 @@ class Count(BaseModel):
 
 @app.post("/decide/")
 async def create_item(count: Count):
-    if(count.car_count1 > 0 and count.car_count2 > 0):
+    sem1 = count.car_count1
+    sem2 = count.car_count2
+    command = ""
+    if(sem1 != 0 or sem2 != 0):
         # sec = 3+(count.car_count*2)
-        command = "1G"
-    else:
-        # sec = 4+(count.car_count2*2)
-        command = "1R"
+        if(sem1 > sem2):
+            command = "1G"
+        else:
+            command = "1R"
+
+    
     print(command)
     return command
 
 # Run with:
-# uvicorn backend_urbanflow:app --host 0.0.0.0 --port 8000
+# uvicorn backend_urban:app --host 127.0.0.1 --port 8000
