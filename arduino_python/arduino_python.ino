@@ -23,7 +23,12 @@ void setup() {
 }
 
 void loop() {
-    digitalWrite(5,1);
+    //digitalWrite(2,1);
+    //digitalWrite(3,1);
+    //digitalWrite(4,1);
+    //digitalWrite(5,1);
+    //digitalWrite(6,1);
+    //digitalWrite(7,1);
     if (Serial.available()) {
     String msg = Serial.readStringUntil('\n');  // ex: "1R15"
 
@@ -31,7 +36,7 @@ void loop() {
         char semaforo = msg.charAt(0);
         char cor = msg.charAt(1);
 
-        // resto da string é o tempo em texto → converter para int
+        // resto da string Ã© o tempo em texto â†’ converter para int
         //int tempo = msg.substring(2).toInt(); 
         // ex: substring(2) = "15"
 
@@ -44,13 +49,42 @@ void loop() {
         //Serial.println(tempo);
         if (semaforo == '1') {
             if (cor == 'G') {
-                digitalWrite(2,0);
-                digitalWrite(4,1);  
+                digitalWrite(7,0);//2R
+                digitalWrite(5,0);//2G
+                digitalWrite(6,1);//2Y
+                delay(3000);
+                digitalWrite(6,0);//2Y
+                digitalWrite(7,1);//2R
+                digitalWrite(5,0);//2G
+                digitalWrite(3,0);//1Y
+                digitalWrite(4,0);//4R
+                digitalWrite(2,1);//2G
+
+
+                 
             }
             if (cor == 'R') {
-                digitalWrite(2,1);
-                digitalWrite(4,0);  
+                digitalWrite(7,1);
+                digitalWrite(6,0);
+                digitalWrite(5,0);
+                digitalWrite(2,0);//1G
+                digitalWrite(4,0);//1R
+                digitalWrite(3,1);//1Y
+                delay(3000);
+                digitalWrite(3,0);//1Y
+                digitalWrite(4,1);//1R
+                digitalWrite(2,0);//1G
+                digitalWrite(5,1);//2G
+                digitalWrite(6,0);//2Y
+                digitalWrite(7,0);//2R
             }
+        }else{
+                digitalWrite(7,1);
+                digitalWrite(6,0);
+                digitalWrite(5,0);
+                digitalWrite(2,0);//1G
+                digitalWrite(4,1);//1R
+                digitalWrite(3,0);//1Y  
         }
       }      
     }

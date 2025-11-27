@@ -34,7 +34,8 @@ async def create_item(count: Count):
             command = "1G"
         else:
             command = "1R"
-
+    else:
+        command="2R"
     
     print(command)
     return command
